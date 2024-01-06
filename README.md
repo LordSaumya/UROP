@@ -1,4 +1,4 @@
-# Data-driven & Physics-Inspired Machine Learning
+# Data-Driven & Physics-Inspired Machine Learning
 UROP Project 2023-24, Saumya Shah
 
 Supervised by Prof. Stéphane Bressan, NUS School of Computing
