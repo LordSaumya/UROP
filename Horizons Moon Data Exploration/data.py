@@ -12,7 +12,7 @@ data = data[61:52704] #end = 52704
 
 ## Make dataframe
 header_list = [
-    ["Datetime", "Coord", "APmag", "S-brt", "delta", "deldot", "S-O-T /r", "S-T-O", "Sky_motion", "Sky_mot_PA", "RelVel-ANG", "Lun_Sky_Brt", "sky_SNR"],
+    ["Datetime", "RA", "DEC", "APmag", "S-brt", "delta", "deldot", "S-O-T /r", "S-T-O", "Sky_motion", "Sky_mot_PA", "RelVel-ANG", "Lun_Sky_Brt", "sky_SNR"],
 ]
 
 df = pd.DataFrame(columns=header_list[0])
@@ -35,8 +35,17 @@ for line in data:
     RelVel_ANG = float(line[17])
     Lun_Sky_Brt = line[18]
     sky_SNR = line[19]
-    line = [date, Coord, APmag, S_brt, delta, deldot, S_O_T, S_T_O, Sky_motion, Sky_mot_PA, RelVel_ANG, Lun_Sky_Brt, sky_SNR]
+    line = [date, RA, DEC, APmag, S_brt, delta, deldot, S_O_T, S_T_O, Sky_motion, Sky_mot_PA, RelVel_ANG, Lun_Sky_Brt, sky_SNR]
     df.loc[len(df)] = line
+
+## Add column for time_from_start
+df["time_from_start"] = (df["Datetime"] - df["Datetime"][0]).dt.total_seconds()
+
+## Sample 1000 entries from dataframe
+df_sample = df.sample(1000)
+
+## Save dataframe sample as csv file
+df_sample.to_csv("horizons_results_sample.csv")
 
 ## Save dataframe as pickle file
 df.to_pickle("horizons_results.pkl") # save dataframe as pickle file
