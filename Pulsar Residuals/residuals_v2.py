@@ -8,8 +8,8 @@ from scipy.optimize import curve_fit
 # Load the data
 d: pd.DataFrame = pd.read_pickle("pulsar_residuals.pkl")
 
-# Assign a theta value to each index (theta = 2 * pi * (x - min) / (max - min))
-d['theta'] = 2 * np.pi * d.index/d.index.max()
+# Assign a theta value to each index (theta = 360 * (x - min) / (max - min))
+d['theta'] = 360 * d.index/d.index.max()
 d['first_diff'] = d['first_diff'] - d['first_diff'].mean()
 
 # Fit function with torch linear regression model
@@ -53,12 +53,11 @@ initial_guess: np.ndarray = np.array([d['first_diff'].max() - d['first_diff'].mi
 
 popt, pcov = curve_fit(fit_func, d['theta'], d['first_diff'], p0=initial_guess)
 
-# Plot the data (x axis from 0 to 2 * pi)
+# Plot the data
 plt.scatter(d['theta'], d['first_diff'], label='Data')
 plt.plot(d['theta'], fit_func(d['theta'], *popt), label='Scipy Fit')
 plt.plot(d['theta'], model(theta).detach().numpy(), label='Torch Fit')
 plt.xlabel('Theta')
 plt.ylabel('First Difference')
-plt.xticks(ticks=np.linspace(0, 2 * np.pi, 5), labels=['0', 'pi/2', 'pi', '3pi/2', '2pi'])
 plt.legend()
 plt.show()

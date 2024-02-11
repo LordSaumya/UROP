@@ -8,8 +8,8 @@ from scipy.optimize import curve_fit
 # Load the data
 d: pd.DataFrame = pd.read_pickle("pulsar_residuals.pkl")
 
-# Assign a theta value to each first_diff (theta = 2 * pi * (x - min) / (max - min))
-d['theta'] = 2 * np.pi * (d['first_diff'] - d['first_diff'].min()) / (d['first_diff'].max() - d['first_diff'].min())
+# Assign a theta value to each first_diff (theta = 360 * (x - min) / (max - min))
+d['theta'] = 360 * (d['first_diff'] - d['first_diff'].min()) / (d['first_diff'].max() - d['first_diff'].min())
 
 # Fit function with torch linear regression model
 
