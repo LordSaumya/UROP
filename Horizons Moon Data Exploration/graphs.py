@@ -66,15 +66,15 @@ df["Month"] = df["Datetime"].dt.month
 # plt.title("Aitoff Projection")
 # plt.show()
 
-# Plot 6: 3D plot of coordinates vs time
-plt.figure(6)
-ax = plt.axes(projection="3d")
-df['date_delta'] = (df['Datetime'] - df['Datetime'].min())  / np.timedelta64(1,'D')
-ax.scatter3D(df["date_delta"], df["Coord"].apply(lambda x: x.ra.wrap_at(180 * u.deg).radian), df["Coord"].apply(lambda x: x.dec.radian))
-ax.set_xlabel("Time (in days since 1st January 2024)")
-ax.set_ylabel("Right Ascension (rad)")
-ax.set_zlabel("Declination (rad)")
-plt.show()
+# # Plot 6: 3D plot of coordinates vs time
+# plt.figure(6)
+# ax = plt.axes(projection="3d")
+# df['date_delta'] = (df['Datetime'] - df['Datetime'].min())  / np.timedelta64(1,'D')
+# ax.scatter3D(df["date_delta"], df["Coord"].apply(lambda x: x.ra.wrap_at(180 * u.deg).radian), df["Coord"].apply(lambda x: x.dec.radian))
+# ax.set_xlabel("Time (in days since 1st January 2024)")
+# ax.set_ylabel("Right Ascension (rad)")
+# ax.set_zlabel("Declination (rad)")
+# plt.show()
 
 # # Plot 7: Polar plot of coordinates vs time
 # plt.figure(7)
@@ -105,4 +105,42 @@ plt.show()
 # plt.ylabel("Declination (Rad)")
 # plt.grid(True)
 # plt.legend()
+# plt.show()
+
+# # Plot 9: Delta vs Time (months on x-axis)
+# plt.figure(9)
+# plt.plot(df["Datetime"], df["delta"])
+# plt.xlabel("Month")
+# plt.ylabel("Delta (AU)")
+# plt.title("Delta vs. Time")
+# plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
+# plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
+# plt.show()
+
+# RA = df['RA'] * np.pi / 180
+# DEC = df['DEC'] * np.pi / 180
+
+# # Plot 10: Delta vs RA
+# plt.figure(10)
+# plt.scatter(RA , df["delta"])
+# plt.xlabel("Right Ascension (rad)")
+# plt.ylabel("Delta (AU)")
+# plt.title("Delta vs. Right Ascension")
+# plt.show()
+
+# # Plot 11: Delta vs DEC
+# plt.figure(11)
+# plt.scatter(DEC , df["delta"])
+# plt.xlabel("Declination (rad)")
+# plt.ylabel("Delta (AU)")
+# plt.title("Delta vs. Declination")
+# plt.show()
+
+# # Plot 12: Delta vs DEC and RA
+# fig = plt.figure(12)
+# ax = fig.add_subplot(111, projection='3d')
+# ax.scatter(RA, DEC, df["delta"])
+# ax.set_xlabel("Right Ascension (rad)")
+# ax.set_ylabel("Declination (rad)")
+# ax.set_zlabel("Delta (AU)")
 # plt.show()
