@@ -7,6 +7,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from sklearn.decomposition import PCA
 
 ## Read in data from pickle file
 df = pd.read_pickle("horizons_results.pkl")
@@ -117,8 +118,8 @@ df["Month"] = df["Datetime"].dt.month
 # plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
 # plt.show()
 
-# RA = df['RA'] * np.pi / 180
-# DEC = df['DEC'] * np.pi / 180
+RA = df['RA'] * np.pi / 180
+DEC = df['DEC'] * np.pi / 180
 
 # # Plot 10: Delta vs RA
 # plt.figure(10)
@@ -144,3 +145,34 @@ df["Month"] = df["Datetime"].dt.month
 # ax.set_ylabel("Declination (rad)")
 # ax.set_zlabel("Delta (AU)")
 # plt.show()
+
+# # Plot 13: Delta vs DEC and RA (3D polar)
+# fig = plt.figure(13)
+# ax = fig.add_subplot(projection='polar')
+# ax.scatter(RA, DEC, df["delta"])
+# ax.set_xlabel("Right Ascension (rad)")
+# ax.set_ylabel("Declination (rad)")
+# plt.show()
+
+# # Plot 14: Delta vs sin(DEC) and sin(RA)
+# fig = plt.figure(12)
+# ax = fig.add_subplot(111, projection='3d')
+# ax.scatter(np.sin(RA), np.sin(DEC), df["delta"])
+# ax.set_xlabel("Sine of Right Ascension")
+# ax.set_ylabel("Sine of Declination")
+# ax.set_zlabel("Delta (AU)")
+# plt.show()
+
+# Plot 15: Delta vs PCA of DEC and RA
+## Calculate PCA using sklearn
+pca = PCA(n_components=1)
+pca.fit(np.array([RA, DEC]).T)
+## Project data onto PCA
+projected = pca.transform(np.array([RA, DEC]).T)
+## Plot
+fig = plt.figure(15)
+ax = fig.add_subplot(111)
+ax.scatter(projected, df["delta"])
+ax.set_xlabel("PCA of Right Ascension and Declination")
+ax.set_ylabel("Delta (AU)")
+plt.show()
