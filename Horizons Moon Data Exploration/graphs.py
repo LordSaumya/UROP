@@ -8,6 +8,8 @@ from astropy.coordinates import SkyCoord
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from sklearn.decomposition import PCA
+from scipy.optimize import curve_fit
+
 
 ## Read in data from pickle file
 df = pd.read_pickle("horizons_results.pkl")
@@ -120,6 +122,7 @@ df["Month"] = df["Datetime"].dt.month
 
 RA = df['RA'] * np.pi / 180
 DEC = df['DEC'] * np.pi / 180
+df['delta'] = df['delta'].astype(float)
 
 # # Plot 10: Delta vs RA
 # plt.figure(10)
@@ -168,11 +171,36 @@ DEC = df['DEC'] * np.pi / 180
 pca = PCA(n_components=1)
 pca.fit(np.array([RA, DEC]).T)
 ## Project data onto PCA
-projected = pca.transform(np.array([RA, DEC]).T)
+projected: np.ndarray = pca.transform(np.array([RA, DEC]).T)
 ## Plot
-fig = plt.figure(15)
-ax = fig.add_subplot(111)
+# fig = plt.figure(15)
+# ax = fig.add_subplot(111)
+# ax.scatter(projected, df["delta"])
+# ax.set_xlabel("PCA of Right Ascension and Declination")
+# ax.set_ylabel("Delta (AU)")
+# plt.show()
+
+# # Curve fit sine to PCA vs delta
+# def sine(x, A, B, C, D):
+#     return A * np.sin(B * x + C) + D
+
+# popt, pcov = curve_fit(sine, projected.flatten(), df["delta"])
+
+# # Plot 16: Delta vs PCA of DEC and RA with sine fit
+# fig = plt.figure(16)
+# ax = fig.add_subplot(111)
+# ax.scatter(projected, df["delta"], label="Data")
+# ax.plot(projected, sine(projected, *popt), color="red", label="Scipy curve fit: {:.5f} * sin({:.5f} * x + {:.5f}) + {:.5f}".format(*popt))
+# ax.set_xlabel("PCA of Right Ascension and Declination")
+# ax.set_ylabel("Delta (gigametres)")
+# plt.legend()
+# plt.show()
+
+# # Plot 17: Delta vs PCA of DEC and RA (polar plot with radius = delta and angle = PCA)
+fig = plt.figure(17)
+ax = fig.add_subplot(projection='polar', label="polar")
 ax.scatter(projected, df["delta"])
 ax.set_xlabel("PCA of Right Ascension and Declination")
+ax.set_ylim(0, 0.003)
 ax.set_ylabel("Delta (AU)")
 plt.show()
