@@ -206,9 +206,9 @@ projected: np.ndarray = pca.transform(np.array([RA, DEC]).T)
 
 # Curve fit (-a*x^2 + b)^0.5 + c to PCA vs delta
 def fit_func(x, a, b, c):
-    return (a * x ** 2 + b) ** 0.5 + c
+    return (-a * x ** 2 + b) ** 0.5 + c
 
-popt, pcov = curve_fit(fit_func, projected.flatten(), df["delta"])
+popt, pcov = curve_fit(fit_func, projected.flatten(), df["delta"], bounds=([0, 0, -10000], [1000, 1000000, 10000]))
 
 # Plot 18: Plot of Delta vs PCA of DEC and RA with curve fit
 fig = plt.figure(18)
