@@ -122,7 +122,6 @@ df["Month"] = df["Datetime"].dt.month
 
 RA = df['RA'] * np.pi / 180
 DEC = df['DEC'] * np.pi / 180
-df['delta'] = df['delta'].astype(float)
 
 # # Plot 10: Delta vs RA
 # plt.figure(10)
@@ -197,10 +196,26 @@ projected: np.ndarray = pca.transform(np.array([RA, DEC]).T)
 # plt.show()
 
 # # Plot 17: Delta vs PCA of DEC and RA (polar plot with radius = delta and angle = PCA)
-fig = plt.figure(17)
-ax = fig.add_subplot(projection='polar', label="polar")
-ax.scatter(projected, df["delta"])
+# fig = plt.figure(17)
+# ax = fig.add_subplot(projection='polar', label="polar")
+# ax.scatter(projected, df["delta"])
+# ax.set_xlabel("PCA of Right Ascension and Declination")
+# ax.set_ylim(0, 0.003)
+# ax.set_ylabel("Delta (AU)")
+# plt.show()
+
+# Curve fit (-a*x^2 + b)^0.5 + c to PCA vs delta
+def fit_func(x, a, b, c):
+    return (a * x ** 2 + b) ** 0.5 + c
+
+popt, pcov = curve_fit(fit_func, projected.flatten(), df["delta"])
+
+# Plot 18: Plot of Delta vs PCA of DEC and RA with curve fit
+fig = plt.figure(18)
+ax = fig.add_subplot(111)
+ax.scatter(projected, df["delta"], label="Data")
+ax.plot(projected, fit_func(projected, *popt), color="red", label="Scipy curve fit: (-{:.5f} * x^2 + {:.5f})^0.5 + {:.5f}".format(*popt))
 ax.set_xlabel("PCA of Right Ascension and Declination")
-ax.set_ylim(0, 0.003)
 ax.set_ylabel("Delta (AU)")
+plt.legend()
 plt.show()
