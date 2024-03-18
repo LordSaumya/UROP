@@ -19,6 +19,12 @@ df = pd.read_pickle("horizons_results.pkl")
 # Extract month from 'Datetime'
 df["Month"] = df["Datetime"].dt.month
 
+# Extract year from 'Datetime'
+df["Year"] = df["Datetime"].dt.year
+
+# Extract day from 'Datetime'
+df["Day"] = df["Datetime"].dt.day
+
 # # Plot 1: Sky Motion vs. Time (months on x-axis)
 # plt.figure(1)
 # plt.plot(df["Datetime"], df["Sky_motion"])
@@ -171,6 +177,8 @@ pca = PCA(n_components=1)
 pca.fit(np.array([RA, DEC]).T)
 ## Project data onto PCA
 projected: np.ndarray = pca.transform(np.array([RA, DEC]).T)
+df["pca"] = projected
+
 ## Plot
 # fig = plt.figure(15)
 # ax = fig.add_subplot(111)
@@ -204,18 +212,85 @@ projected: np.ndarray = pca.transform(np.array([RA, DEC]).T)
 # ax.set_ylabel("Delta (AU)")
 # plt.show()
 
-# Curve fit (-a*x^2 + b)^0.5 + c to PCA vs delta
-def fit_func(x, a, b, c):
-    return (-a * x ** 2 + b) ** 0.5 + c
+# Curve fit (-x^2 + a)^0.5 + b to PCA vs delta
+def fit_func(x, a, b):
+    return (-x **2 + a) ** 0.5 + b
 
-popt, pcov = curve_fit(fit_func, projected.flatten(), df["delta"], bounds=([0, 0, -10000], [1000, 1000000, 10000]))
+popt, pcov = curve_fit(fit_func, projected.flatten(), df["delta"], bounds=([0, -10000], [1000, 10000]))
 
-# Plot 18: Plot of Delta vs PCA of DEC and RA with curve fit
-fig = plt.figure(18)
-ax = fig.add_subplot(111)
-ax.scatter(projected, df["delta"], label="Data")
-ax.plot(projected, fit_func(projected, *popt), color="red", label="Scipy curve fit: (-{:.5f} * x^2 + {:.5f})^0.5 + {:.5f}".format(*popt))
-ax.set_xlabel("PCA of Right Ascension and Declination")
-ax.set_ylabel("Delta (AU)")
+# # Plot 18: Plot of Delta vs PCA of DEC and RA with curve fit
+# fig = plt.figure(18)
+# ax = fig.add_subplot(111)
+# ax.scatter(projected, df["delta"], label="Data")
+# ax.plot(projected, fit_func(projected, *popt), color="red", label="Scipy curve fit: (-x^2 + {:.5f})^0.5 + {:.5f}".format(*popt))
+# ax.set_xlabel("PCA of Right Ascension and Declination")
+# ax.set_ylabel("Delta (AU)")
+# plt.legend()
+# plt.show()
+
+df['residuals'] = df['delta'] - fit_func(projected.flatten(), *popt)
+
+# # Plot 19: Residuals vs PCA of DEC and RA (individual graphs for each month)
+# for month in df["Month"].unique():
+#     plt.scatter(df[df["Month"] == month]["pca"], df[df["Month"] == month]["delta"], label=f"Month {month}", s=10)
+#     plt.xlabel(f"PCA of Right Ascension and Declination for {month}")
+#     plt.ylabel("Delta")
+#     plt.title("Residuals vs PCA of DEC and RA")
+#     plt.legend()
+#     plt.show()
+
+# # Per day average of delta
+# daily_max = df.groupby([df['Day'], df['Month']])['delta'].max().reset_index()
+# daily_max["date"] = daily_max.apply(lambda row: dt.datetime(2024, int(row["Month"]), int(row["Day"])), axis=1)
+# daily_max.sort_values(by="date", inplace=True)
+
+# # Find all maximum days
+# maxima = pd.DataFrame(columns=daily_max.columns)
+# for i in range(14, len(daily_max) - 14):
+#     window = daily_max[i - 14: i + 15]
+#     if window["delta"].iloc[14] == window["delta"].max():
+#         maxima.loc[len(maxima)] = window.iloc[14]
+
+# max_first_idx = daily_max[0:14]["delta"].idxmax()
+# max_last_idx = daily_max[-14:]["delta"].idxmax()
+# maxima.loc[len(maxima)] = daily_max.loc[max_first_idx]
+# maxima.loc[len(maxima)] = daily_max.loc[max_last_idx]
+
+dates_of_maxima = [dt.datetime(2024, 1, 2, 0, 20), dt.datetime(2024, 1, 29, 23), dt.datetime(2024, 2, 25, 21), dt.datetime(2024, 3, 23, 19), dt.datetime(2024, 4, 20, 17, 30), dt.datetime(2024, 5, 17, 15, 40), dt.datetime(2024, 6, 14, 14, 10), dt.datetime(2024, 7, 12, 12, 40), dt.datetime(2024, 8, 9, 11, 20), dt.datetime(2024, 9, 6, 9, 50), dt.datetime(2024, 10, 3, 8), dt.datetime(2024, 10, 30, 6), dt.datetime(2024, 11, 27, 4, 30), dt.datetime(2024, 12, 24, 2, 30)]
+
+# Assign a lunar cycle number to all entries in DF based on maxima
+for i in range(0, len(dates_of_maxima) - 1):
+    df.loc[(df['Datetime'] >= dates_of_maxima[i]) & (df['Datetime'] < dates_of_maxima[i + 1]), 'lunar_cycle'] = i + 1
+
+# Replace all NaN values with 0
+df['lunar_cycle'] = df['lunar_cycle'].fillna(0)
+
+# Divide df into separate dataframes based on lunar cycle
+lunar_dfs = {}
+for cycle in range(1, 12):
+    lunar_dfs[cycle] = df[df['lunar_cycle'] == cycle]
+
+# # Plot 20: Residuals vs PCA of DEC and RA (superimposed graphs)
+for cycle, df in lunar_dfs.items():
+    plt.scatter(df["pca"], df["residuals"], label=f"Lunar Cycle {cycle}", s=10)
+plt.xlabel("PCA of Right Ascension and Declination")
+plt.ylabel("Residuals")
+plt.title("Residuals vs PCA of DEC and RA")
 plt.legend()
 plt.show()
+
+# for i in lunar_dfs.keys():
+#     # Curve fit (-x^2 + a)^0.5 + b to lunar df for each cycle
+#     popt, pcov = curve_fit(fit_func, lunar_dfs[i]['pca'], lunar_dfs[i]['delta'], bounds=([0, -10000], [1000, 10000]))
+#     lunar_dfs[i]['residuals'] = lunar_dfs[i]['delta'] - fit_func(lunar_dfs[i]['pca'], *popt)
+
+#     # Plots of residuals vs PCA of DEC and RA for each lunar cycle
+#     plt.scatter(lunar_dfs[i]["pca"], lunar_dfs[i]["residuals"], label=f"Individual fit for Lunar Cycle {i}", s=10)
+#     plt.scatter(lunar_dfs[i]["pca"], df[df["lunar_cycle"] == i]["residuals"], label=f"Overall fit for Lunar Cycle {i}", s=10)
+#     plt.xlabel("PCA of Right Ascension and Declination")
+#     plt.ylabel("Residuals")
+#     plt.title("Residuals vs PCA of DEC and RA (Lunar Cycle {})".format(i))
+#     plt.legend()
+#     plt.show()
+
+

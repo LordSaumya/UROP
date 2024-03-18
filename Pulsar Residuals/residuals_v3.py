@@ -91,3 +91,6 @@ plt.xlabel('Theta')
 plt.ylabel('Circular Motion Residuals')
 plt.legend()
 plt.show()
+
+# Save data to csv
+d.to_csv("pulsar_ucm_residuals.csv")
