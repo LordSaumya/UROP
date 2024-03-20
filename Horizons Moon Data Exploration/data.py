@@ -8,7 +8,7 @@ from astropy.coordinates import SkyCoord
 
 ## Read in data from txt file
 data = open("horizons_results.txt", "r").readlines()
-data = data[61:52704] #end = 52704
+data = data[60:8845] #end = 8845
 
 ## Make dataframe
 header_list = [
@@ -41,11 +41,11 @@ for line in data:
 ## Add column for time_from_start
 df["time_from_start"] = (df["Datetime"] - df["Datetime"][0]).dt.total_seconds()
 
-## Sample 1000 entries from dataframe
-df_sample = df.sample(1000)
+# ## Sample 1000 entries from dataframe
+# df_sample = df.sample(1000)
 
-## Save dataframe sample as csv file
-df_sample.to_csv("horizons_results_sample.csv")
+# ## Save dataframe sample as csv file
+# df_sample.to_csv("horizons_results_sample.csv")
 
 ## Save dataframe as pickle file
 df.to_pickle("horizons_results.pkl") # save dataframe as pickle file
