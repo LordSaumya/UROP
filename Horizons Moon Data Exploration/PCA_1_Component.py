@@ -174,13 +174,13 @@ pca.fit(np.array([RA, DEC]).T)
 projected: np.ndarray = pca.transform(np.array([RA, DEC]).T)
 df["pca"] = projected
 
-# # Plot
-# fig = plt.figure(15)
-# ax = fig.add_subplot(111)
-# ax.scatter(projected, df["delta"])
-# ax.set_xlabel("PCA of Right Ascension and Declination")
-# ax.set_ylabel("Delta (AU)")
-# plt.show()
+# Plot
+fig = plt.figure(15)
+ax = fig.add_subplot(111)
+ax.scatter(df["pca"], df["delta"])
+ax.set_xlabel("PCA of Right Ascension and Declination")
+ax.set_ylabel("Delta (AU)")
+plt.show()
 
 # # Curve fit sine to PCA vs delta
 # def sine(x, A, B, C, D):
@@ -274,19 +274,21 @@ for cycle in range(1, 12):
     lunar_dfs[cycle] = df[df['lunar_cycle'] == cycle]
 
 # # Plot 20: Residuals vs PCA of DEC and RA (superimposed graphs)
-for cycle, df in lunar_dfs.items():
-    plt.scatter(df["pca"], df["residuals"], label=f"Lunar Cycle {cycle}", s=10)
+AI_Feynman_preds = [np.arcsin(1.000005155726+(-(df["pca"]+((-df["pca"])+1)))), -2.3800641e-5*df["pca"]/(df["pca"]**2 + 1), 0.000023800641*(((-df["pca"])+1)/((df["pca"]**2)+1)), np.tan(0.000023800641*(((-df["pca"])+1)/((df["pca"]**2)+1))), (2.3800641e-5 - 2.3800641e-5*df["pca"])/(df["pca"]**2 + 1),np.tan((2.3800641e-5 - 2.3800641e-5*df["pca"])/(df["pca"]**2 + 1))]
+plt.scatter(df["pca"], df["residuals"], label="Data")
+for i in range(6):
+    plt.plot(df["pca"], AI_Feynman_preds[i], label=f"AI Feynman Prediction {i+1}")
 plt.xlabel("PCA of Right Ascension and Declination")
 plt.ylabel("Residuals (AU)")
 plt.title("Residuals vs PCA of DEC and RA")
 plt.legend()
 plt.show()
 
-# Plot 21: Delta vs PCA of DEC and RA (superimposed graphs)
-for cycle, df in lunar_dfs.items():
-    plt.scatter(df["pca"], df["delta"], label=f"Lunar Cycle {cycle}", s=10)
-plt.xlabel("PCA of Right Ascension and Declination")
-plt.ylabel("Delta (AU)")
-plt.title("Delta vs PCA of DEC and RA")
-plt.legend()
-plt.show()
+# # Plot 21: Delta vs PCA of DEC and RA (superimposed graphs)
+# for cycle, df in lunar_dfs.items():
+#     plt.scatter(df["pca"], df["delta"], label=f"Lunar Cycle {cycle}", s=10)
+# plt.xlabel("PCA of Right Ascension and Declination")
+# plt.ylabel("Delta (AU)")
+# plt.title("Delta vs PCA of DEC and RA")
+# plt.legend()
+# plt.show()
