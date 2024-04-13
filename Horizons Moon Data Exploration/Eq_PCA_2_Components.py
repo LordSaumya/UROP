@@ -175,23 +175,25 @@ projected: np.ndarray = pca.transform(np.array([RA, DEC]).T)
 df["pca1"] = projected[:, 0]
 df["pca2"] = projected[:, 1]
 df["pcaT"] = df["pca1"] + df["pca2"]
+print("explained variance ratio: ", pca.explained_variance_ratio_)
+print("singular values: ", pca.singular_values_)
 
-# # Plot 15: Delta vs PCA of DEC and RA
-fig = plt.figure(15)
-ax = fig.add_subplot(111)
-ax.scatter(df["pca1"], df["delta"], label="PC 1")
-ax.scatter(df["pca2"], df["delta"], label="PC 2")
-ax.set_xlabel("PCs of Right Ascension and Declination")
-ax.set_ylabel("Delta (AU)")
+# # # Plot 15: Delta vs PCA of DEC and RA
+# fig = plt.figure(15)
+# ax = fig.add_subplot(111)
+# ax.scatter(df["pca1"], df["delta"], label="PC 1")
+# ax.scatter(df["pca2"], df["delta"], label="PC 2")
+# ax.set_xlabel("PCs of Right Ascension and Declination")
+# ax.set_ylabel("Delta (AU)")
 
-# Plot vertical lines at +pi/6 and -pi/6, -pi and pi
-ax.axvline(x=np.pi/6, color='r', linestyle='--', label="pi/6")
-ax.axvline(x=-np.pi/6, color='r', linestyle='--', label="-pi/6")
-ax.axvline(x=-np.pi, color='g', linestyle='--', label="-pi")
-ax.axvline(x=np.pi, color='g', linestyle='--', label="pi")
+# # Plot vertical lines at +pi/6 and -pi/6, -pi and pi
+# ax.axvline(x=np.pi/6, color='r', linestyle='--', label="pi/6")
+# ax.axvline(x=-np.pi/6, color='r', linestyle='--', label="-pi/6")
+# ax.axvline(x=-np.pi, color='g', linestyle='--', label="-pi")
+# ax.axvline(x=np.pi, color='g', linestyle='--', label="pi")
 
-plt.legend()
-plt.show()
+# plt.legend()
+# plt.show()
 
 # # Curve fit sine to PCA vs delta
 # def sine(x, A, B, C, D):
@@ -272,6 +274,8 @@ df['residuals2'] = df['delta'] - fit_func(df['pca2'], *popt)
 #     max_time = max_day[max_day["delta"] == max_day["delta"].max()]["Datetime"].iloc[0]
 #     max_times.loc[len(max_times)] = max_time
 
+# print(max_times)
+
 dates_of_maxima = [dt.datetime(2024, 1, 1, 15), dt.datetime(2024, 1, 29, 8), dt.datetime(2024, 2, 25, 15), dt.datetime(2024, 3, 23, 16), dt.datetime(2024, 4, 20, 2), dt.datetime(2024, 5, 17, 19), dt.datetime(2024, 6, 14, 14), dt.datetime(2024, 7, 12, 8), dt.datetime(2024, 8, 9, 2), dt.datetime(2024, 9, 5, 15), dt.datetime(2024, 10, 2, 20), dt.datetime(2024, 10, 29, 23), dt.datetime(2024, 11, 26, 12), dt.datetime(2024, 12, 24, 7)]
 
 # Assign a lunar cycle number to all entries in DF based on maxima
@@ -280,6 +284,26 @@ for i in range(0, len(dates_of_maxima) - 1):
 
 # Replace all NaN values with 0
 df['lunar_cycle'] = df['lunar_cycle'].fillna(0)
+
+# Plot 20: Delta vs time with lunar cycle colours
+for cycle in range(1, 13):
+    plt.scatter(df[df['lunar_cycle'] == cycle]["Datetime"], df[df['lunar_cycle'] == cycle]["delta"], label=f"Lunar Cycle {cycle}", s=10)
+plt.xlabel("Time")
+plt.ylabel("Delta (AU)")
+plt.title("Delta vs Time")
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
+plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
+plt.legend()
+plt.show()
+
+# Plot 21: Delta vs day with lunar cycle colours
+for cycle in range(1, 13):
+    plt.scatter(df[df['lunar_cycle'] == cycle]["Day"], df[df['lunar_cycle'] == cycle]["delta"], label=f"Lunar Cycle {cycle}", s=10)
+plt.xlabel("Day")
+plt.ylabel("Delta (AU)")
+plt.title("Delta vs Day")
+plt.legend()
+plt.show()
 
 # Divide df into separate dataframes based on lunar cycle
 lunar_dfs = {}

@@ -14,8 +14,6 @@ from scipy.optimize import curve_fit
 ## Read in data from pickle file
 df = pd.read_pickle("horizons_results.pkl")
 
-## Plot
-
 # Extract month from 'Datetime'
 df["Month"] = df["Datetime"].dt.month
 
