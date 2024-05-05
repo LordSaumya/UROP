@@ -266,9 +266,11 @@ for i in range(0, len(dates_of_maxima) - 1):
 # Replace all NaN values with 0
 df['lunar_cycle'] = df['lunar_cycle'].fillna(0)
 
+print(df['lunar_cycle'].unique())
+
 # Divide df into separate dataframes based on lunar cycle
 lunar_dfs = {}
-for cycle in range(1, 12):
+for cycle in range(0, 14):
     lunar_dfs[cycle] = df[df['lunar_cycle'] == cycle]
 
 # # Plot 20: Residuals vs PCA of DEC and RA (superimposed graphs)
