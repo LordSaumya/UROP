@@ -1,0 +1,32 @@
+\begin{thebibliography}{1}
+
+\bibitem{Brunton2016}
+Steven~L Brunton, Joshua~L Proctor, and J~Nathan Kutz.
+\newblock {Discovering governing equations from data by sparse identification
+  of nonlinear dynamical systems}.
+\newblock 113(15):3932--3937, 2016.
+
+\bibitem{Khoo2023.1}
+Zi-Yu Khoo, Gokul Rajiv, Abel Yang, Jonathan Sze~Choong Low, and St{\'{e}}phane
+  Bressan.
+\newblock {Celestial Machine Learning: Discovering the Planarity,
+  Heliocentricity, and Orbital Equation of Mars with AI Feynman}.
+\newblock pages 201--207. 2023.
+
+\bibitem{Khoo2023.2}
+Zi-yu Khoo, Abel Yang, Jonathan Sze~Choong Low, and St{\'{e}}phane Bressan.
+\newblock {Celestial Machine Learning: From Data to Mars and Beyond with AI
+  Feynman}.
+\newblock pages 469--474. 2023.
+
+\bibitem{Lemos2023}
+Pablo Lemos, Niall Jeffrey, Miles Cranmer, Shirley Ho, and Peter Battaglia.
+\newblock {Rediscovering orbital mechanics with machine learning}.
+\newblock {\em Machine Learning: Science and Technology}, 4(4):045002, 2023.
+
+\bibitem{udrescu2020}
+Silviu-Marian Udrescu and Max Tegmark.
+\newblock {AI Feynman: A physics-inspired method for symbolic regression}.
+\newblock Technical report, 2020.
+
+\end{thebibliography}
