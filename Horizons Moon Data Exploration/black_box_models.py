@@ -51,9 +51,8 @@ for lunar_df in lunar_dfs:
 ### MODELS
 inputs = torch.tensor(df[["RA", "DEC"]].values, dtype=torch.float32)
 labels = torch.tensor(df["residual"].values, dtype=torch.float32).view(-1, 1)
-inputs_rnn = torch.tensor(list(lunar_df[["RA", "DEC"]].values for lunar_df in lunar_dfs), dtype=torch.float32).view(-1, max_length * len(lunar_dfs), 2)
-labels_rnn = torch.tensor(list(lunar_df["residual"].values for lunar_df in lunar_dfs), dtype=torch.float32).view(-1, max_length * len(lunar_dfs), 1)
-print(inputs.shape, labels.shape, inputs_rnn.shape, labels_rnn.shape)
+# inputs_rnn = torch.tensor(list(lunar_df[["RA", "DEC"]].values for lunar_df in lunar_dfs), dtype=torch.float32).view(-1, max_length * len(lunar_dfs), 2)
+# labels_rnn = torch.tensor(list(lunar_df["residual"].values for lunar_df in lunar_dfs), dtype=torch.float32).view(-1, max_length * len(lunar_dfs), 1)
 criterion = torch.nn.MSELoss()
 
 # Model 1: 3-MLP
