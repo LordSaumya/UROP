@@ -28,7 +28,7 @@ df["Day"] = df["Datetime"].dt.day
 df["time_from_start"] = (df["Datetime"] - df["Datetime"][0]).dt.total_seconds()
 
 # For circular motion, the geocentric distance is constant at about 384,400 km / 149,597,870.7 ~ 0.00256955528 AU
-df["residual"] = (df["delta"] - 0.00256955528) * 384400
+df["residual"] = (df["delta"] - 0.00256955528) * 384400 # Residual in KM
 
 dates_of_maxima = [dt.datetime(2024, 1, 1, 15), dt.datetime(2024, 1, 29, 8), dt.datetime(2024, 2, 25, 15), dt.datetime(2024, 3, 23, 16), dt.datetime(2024, 4, 20, 2), dt.datetime(2024, 5, 17, 19), dt.datetime(2024, 6, 14, 14), dt.datetime(2024, 7, 12, 8), dt.datetime(2024, 8, 9, 2), dt.datetime(2024, 9, 5, 15), dt.datetime(2024, 10, 2, 20), dt.datetime(2024, 10, 29, 23), dt.datetime(2024, 11, 26, 12), dt.datetime(2024, 12, 24, 7)]
 
@@ -153,7 +153,7 @@ plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%M-%Y"))
 plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
 plt.gcf().autofmt_xdate()
 plt.xlabel("Datetime")
-plt.ylabel("Residual (AU)")
+plt.ylabel("Residual (KM)")
 plt.title("Residual vs Datetime")
 plt.legend()
 plt.show()
