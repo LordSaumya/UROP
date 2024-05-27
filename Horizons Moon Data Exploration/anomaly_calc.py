@@ -79,6 +79,12 @@ ax.xaxis.set_major_locator(mdates.MonthLocator())
 ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
 plt.show()
 
-## Save results to csv
+## Transform data for AI Feynman
 df = pd.concat(lunar_dfs)
+df["sin_1_mean_anomaly"] = np.sin(df["mean_anomaly"])
+df["sin_2_mean_anomaly"] = np.sin(2 * df["mean_anomaly"])
+df["sin_3_mean_anomaly"] = np.sin(3 * df["mean_anomaly"])
+df = df[["mean_anonamly", "sin_1_mean_anomaly", "sin_2_mean_anomaly", "sin_3_mean_anomaly", "anomaly_residual"]]
+
+## Save results to csv
 df.to_csv("lunar_anomalies.csv")
