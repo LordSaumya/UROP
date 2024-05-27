@@ -78,3 +78,7 @@ ax.legend()
 ax.xaxis.set_major_locator(mdates.MonthLocator())
 ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
 plt.show()
+
+## Save results to csv
+df = pd.concat(lunar_dfs)
+df.to_csv("lunar_anomalies.csv")
