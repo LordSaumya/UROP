@@ -85,7 +85,7 @@ df["sin_1_mean_anomaly"] = np.sin(df["mean_anomaly"])
 df["sin_2_mean_anomaly"] = np.sin(2 * df["mean_anomaly"])
 df["sin_3_mean_anomaly"] = np.sin(3 * df["mean_anomaly"])
 df["scaled_anomaly_residual"] = df["anomaly_residual"] * 10
-df = df[["mean_anomaly", "sin_1_mean_anomaly", "sin_2_mean_anomaly", "sin_3_mean_anomaly", "scaled_anomaly_residual"]]
+df = df[["mean_anomaly", "sin_1_mean_anomaly", "sin_2_mean_anomaly", "sin_3_mean_anomaly", "scaled_anomaly_residual", "lunar_cycle"]]
 
 ## Save results to csv
 df.to_csv("lunar_anomalies.csv")
