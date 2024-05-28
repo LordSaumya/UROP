@@ -8,6 +8,7 @@ from astropy.coordinates import SkyCoord
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
 from scipy.optimize import curve_fit
 import torch
 
@@ -49,10 +50,14 @@ for lunar_df in lunar_dfs:
     lunar_df = pd.concat([lunar_df, pd.DataFrame(np.zeros((max_length - len(lunar_df), len(lunar_df.columns))))])
 
 ### MODELS
-inputs = torch.tensor(df[["RA", "DEC"]].values, dtype=torch.float32)
-labels = torch.tensor(df["residual"].values, dtype=torch.float32).view(-1, 1)
-# inputs_rnn = torch.tensor(list(lunar_df[["RA", "DEC"]].values for lunar_df in lunar_dfs), dtype=torch.float32).view(-1, max_length * len(lunar_dfs), 2)
-# labels_rnn = torch.tensor(list(lunar_df["residual"].values for lunar_df in lunar_dfs), dtype=torch.float32).view(-1, max_length * len(lunar_dfs), 1)
+
+# Random train-test split
+train_size = 0.9
+train, test = train_test_split(df, train_size=train_size)
+train_inputs = torch.tensor(train[["RA", "DEC"]].values, dtype=torch.float32)
+train_labels = torch.tensor(train["residual"].values, dtype=torch.float32).view(-1, 1)
+test_inputs = torch.tensor(test[["RA", "DEC"]].values, dtype=torch.float32)
+test_labels = torch.tensor(test["residual"].values, dtype=torch.float32).view(-1, 1)
 criterion = torch.nn.MSELoss()
 
 # Model 1: 3-MLP
@@ -73,8 +78,8 @@ model_3 = MLP_3()
 optimiser = torch.optim.Adam(model_3.parameters(), lr=0.001)
 for epoch in range(1000):
     optimiser.zero_grad()
-    outputs = model_3(inputs)
-    loss = criterion(outputs, labels)
+    outputs = model_3(train_inputs)
+    loss = criterion(outputs, train_labels)
     loss.backward()
     optimiser.step()
     if epoch % 100 == 0:
@@ -102,13 +107,13 @@ model_5 = MLP_5()
 optimiser = torch.optim.Adam(model_5.parameters(), lr=0.001)
 for epoch in range(1000):
     optimiser.zero_grad()
-    outputs = model_5(inputs)
-    loss = criterion(outputs, labels)
+    outputs = model_5(train_inputs)
+    loss = criterion(outputs, train_labels)
     loss.backward()
     optimiser.step()
     if epoch % 100 == 0:
         print(f"Epoch {epoch}, Loss: {loss.item()}")
-    
+
 # Model 3: 5-MLP with batch normalisation and dropout
 class MLP_5_BN_DO(torch.nn.Module):
     def __init__(self):
@@ -122,12 +127,12 @@ class MLP_5_BN_DO(torch.nn.Module):
         self.bn2 = torch.nn.BatchNorm1d(32)
         self.bn3 = torch.nn.BatchNorm1d(64)
         self.bn4 = torch.nn.BatchNorm1d(32)
-        self.dropout = torch.nn.Dropout(0.5)
+        self.dropout = torch.nn.Dropout(0.1)
     def forward(self, x):
-        x = torch.nn.functional.relu(self.bn1(self.fc1(x)))
-        x = torch.nn.functional.relu(self.bn2(self.fc2(x)))
-        x = torch.nn.functional.relu(self.bn3(self.fc3(x)))
-        x = torch.nn.functional.relu(self.bn4(self.fc4(x)))
+        x = self.dropout(torch.nn.functional.relu(self.bn1(self.fc1(x))))
+        x = self.dropout(torch.nn.functional.relu(self.bn2(self.fc2(x))))
+        x = self.dropout(torch.nn.functional.relu(self.bn3(self.fc3(x))))
+        x = self.dropout(torch.nn.functional.relu(self.bn4(self.fc4(x))))
         x = self.fc5(x)
         return x
     
@@ -136,20 +141,39 @@ model_5_BN_DO = MLP_5_BN_DO()
 optimiser = torch.optim.Adam(model_5_BN_DO.parameters(), lr=0.001)
 for epoch in range(1000):
     optimiser.zero_grad()
-    outputs = model_5_BN_DO(inputs)
-    loss = criterion(outputs, labels)
+    outputs = model_5_BN_DO(train_inputs)
+    loss = criterion(outputs, train_labels)
     loss.backward()
     optimiser.step()
     if epoch % 100 == 0:
         print(f"Epoch {epoch}, Loss: {loss.item()}")
 
+# Test 3-MLP
+model_3.eval()
+test_outputs = model_3(test_inputs)
+test_loss = criterion(test_outputs, test_labels)
+print(f"3-MLP - Test Loss: {test_loss.item()}")
+
+# Test 5-MLP
+model_5.eval()
+test_outputs = model_5(test_inputs)
+test_loss = criterion(test_outputs, test_labels)
+print(f"5-MLP - Test Loss: {test_loss.item()}")
+
+# Test 5-MLP with batch normalisation and dropout
+model_5_BN_DO.eval()
+test_outputs = model_5_BN_DO(test_inputs)
+test_loss = criterion(test_outputs, test_labels)
+print(f"5-MLP-BN-DO - Test Loss: {test_loss.item()}")
+
 # Plot models vs data
+inputs = torch.tensor(df[["RA", "DEC"]].values, dtype=torch.float32)
 plt.figure(figsize=(10, 5))
 plt.scatter(df["Datetime"], df["residual"], s=1, label="Data")
 plt.scatter(df["Datetime"], model_3(inputs).detach().numpy(), s=1, label="3-MLP")
 plt.scatter(df["Datetime"], model_5(inputs).detach().numpy(), s=1, label="5-MLP")
 plt.scatter(df["Datetime"], model_5_BN_DO(inputs).detach().numpy(), s=1, label="5-MLP with BN and DO")
-plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%M-%Y"))
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%m-%Y"))
 plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
 plt.gcf().autofmt_xdate()
 plt.xlabel("Datetime")
