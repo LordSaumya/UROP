@@ -52,6 +52,8 @@ for i in range(0, len(lunar_dfs)):
     r_per[i] = min(lunar_dfs[i]["delta"])
     ecc[i] = (r_apo[i] - r_per[i]) / (r_apo[i] + r_per[i])
 
+print(ecc)
+
 ## Eccentric, Mean, and True Anomalies
 semi_major_axis = [0] * len(lunar_dfs)
 error_vals = []
@@ -85,7 +87,7 @@ df["sin_1_mean_anomaly"] = np.sin(df["mean_anomaly"])
 df["sin_2_mean_anomaly"] = np.sin(2 * df["mean_anomaly"])
 df["sin_3_mean_anomaly"] = np.sin(3 * df["mean_anomaly"])
 df["scaled_anomaly_residual"] = df["anomaly_residual"] * 10
-df = df[["Datetime", "delta", "mean_anomaly", "sin_1_mean_anomaly", "sin_2_mean_anomaly", "sin_3_mean_anomaly", "anomaly_residual", "lunar_cycle"]]
+df = df[["RA", "DEC", "Datetime", "delta", "mean_anomaly", "sin_1_mean_anomaly", "sin_2_mean_anomaly", "sin_3_mean_anomaly", "anomaly_residual", "lunar_cycle"]]
 
 ## Save results to csv
 df.to_csv("lunar_anomalies.csv")
