@@ -34,8 +34,8 @@ df["residual"] = (df["delta"] - 0.00256955528) * 384400 # Residual in KM
 cycle_num = 3
 df = df[df["lunar_cycle"] == cycle_num]
 
-# Scale anomaly residual
-df["anomaly_residual"] = df["anomaly_residual"] * 10
+# Scale anomaly residual and add Gaussian noise
+df["anomaly_residual"] = df["anomaly_residual"] * 10 + np.random.normal(0, 0.1, len(df))
 
 ### Models
 
