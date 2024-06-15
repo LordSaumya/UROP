@@ -103,5 +103,17 @@ plt.show()
 
 df = df[['TOA', 'a_dist_first_corrected']]
 df.rename(columns={'a_dist_first_corrected': 'dist'}, inplace=True)
+df['scaled_dist'] = df['dist'] / 10e7
+df['norm_TOA'] = df['TOA']/df['TOA'].max() * np.pi * 2
+df['sin_norm_TOA'] = np.sin(df['norm_TOA'])
+
+# Plot sin vs. dist
+plt.figure()
+plt.scatter(df['norm_TOA'], df['scaled_dist'])
+plt.xlabel("sin(norm_TOA)")
+plt.ylabel("scaled_dist")
+plt.title("sin(norm_TOA) vs. scaled_dist")
+plt.show()
+
 print(df)
 df.to_csv('kepler_equation.csv', index=False)
