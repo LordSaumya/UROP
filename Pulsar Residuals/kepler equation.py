@@ -101,5 +101,7 @@ plt.title("Distance vs. Time of Arrival")
 plt.legend()
 plt.show()
 
+df = df[['TOA', 'a_dist_first_corrected']]
+df.rename(columns={'a_dist_first_corrected': 'dist'}, inplace=True)
 print(df)
-df[['TOA', 'a_dist_first_corrected']].to_csv('kepler_equation.csv', index=False)
+df.to_csv('kepler_equation.csv', index=False)
