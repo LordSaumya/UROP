@@ -102,4 +102,4 @@ plt.legend()
 plt.show()
 
 print(df)
-df[['TOA', 'a_dist_first_corrected']].to_csv('kepler_equation.csv', header=False, index=False)
+df[['TOA', 'a_dist_first_corrected']].to_csv('kepler_equation.csv')
