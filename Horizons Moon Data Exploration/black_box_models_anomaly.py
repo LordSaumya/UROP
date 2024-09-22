@@ -26,8 +26,6 @@ df["Year"] = df["Datetime"].dt.year
 # Extract day from 'Datetime'
 df["Day"] = df["Datetime"].dt.day
 
-df["time_from_start"] = (df["Datetime"] - df["Datetime"][0]).dt.total_seconds()
-
 # For circular motion, the geocentric distance is constant at about 384,400 km / 149,597,870.7 ~ 0.00256955528 AU
 df["residual"] = (df["delta"] - 0.00256955528) * 384400 # Residual in KM
 
