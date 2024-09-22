@@ -1,8 +1,12 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 pd.options.mode.chained_assignment = None # default='warn'
 from scipy.optimize import curve_fit
+from scipy.optimize import minimize as minimise
+import random
+from scipy.integrate import odeint
 
 C = 299792458  # Speed of light in m/s
 
@@ -81,6 +85,11 @@ outliers_to_remove = [223, 226, 289, 269, 270, 253, 254, 290, 221, 227]
 df.drop(outliers_to_remove, inplace=True)
 df.reset_index(drop=True, inplace=True)
 
+df['speed'] = df['a_dist_first_corrected'].diff() / df['first_diff']
+df['abs_speed'] = abs(df['speed'])
+df["rolling_speed"] = df["speed"].rolling(window=15).mean()
+df["rolling_abs_speed"] = df["abs_speed"].rolling(window=15).mean()
+
 # def outlier_finder(dvec, dt):
 #     derivs = dvec/dt
 #     breaks = []
@@ -92,28 +101,68 @@ df.reset_index(drop=True, inplace=True)
 # outliers = [x for x in outliers if x not in outliers_to_remove]
 # print(outliers)
 
-plt.figure()
-plt.scatter(df["TOA"], df["a_dist_first"], label = "Uncorrected")
-plt.scatter(df["TOA"], df["a_dist_first_corrected"], color='red', label = "Corrected")
-plt.xlabel("Time of Arrival (sec)")
-plt.ylabel("Distance (m)")
-plt.title("Distance vs. Time of Arrival")
-plt.legend()
-plt.show()
+# time_of_periapse = df["TOA"].iloc[df["rolling_abs_speed"].idxmax()]
+# df["mean_anomaly"] = (2 * np.pi / pb) * (df["TOA"] - time_of_periapse)
+
+# # Plot mean anomaly vs. Distance
+# plt.figure()
+# plt.scatter(df["mean_anomaly"], df["a_dist_first_corrected"], color='red')
+# plt.xlabel("Mean Anomaly (rad)")
+# plt.ylabel("Distance (m)")
+# plt.title("Distance vs. Mean Anomaly")
+# plt.show()
+
+
+# plt.figure()
+# plt.scatter(df["TOA"], df["a_dist_first"], label = "Uncorrected")
+# plt.scatter(df["TOA"], df["a_dist_first_corrected"], color='red', label = "Corrected")
+# plt.vlines(df["TOA"].iloc[df["abs_speed"].idxmax()], -1e7, 9e6, color='green', label='Greatest Speed')
+# plt.vlines(df["TOA"].iloc[df["rolling_abs_speed"].idxmax()], -1e7, 9e6, color='purple', label='Greatest Rolling Mean Speed')
+# plt.xlabel("Time of Arrival (sec)")
+# plt.ylabel("Distance (m)")
+# plt.title("Distance vs. Time of Arrival")
+# plt.legend()
+# plt.show()
+
+# # Plot speed vs. TOA
+# plt.figure()
+# plt.scatter(df['TOA'], df['speed'])
+# plt.plot(df['TOA'], df['rolling_speed'], color='red', label='Rolling Mean')
+# plt.vlines(df["TOA"].iloc[df["abs_speed"].idxmax()], df['speed'].min(), df['speed'].max(), color='green', label='Greatest Absolute Speed')
+# plt.vlines(df["TOA"].iloc[df["rolling_abs_speed"].idxmax()], df['speed'].min(), df['speed'].max(), color='purple', label='Greatest Rolling Absolute Speed')
+# plt.xlabel("Time of Arrival (sec)")
+# plt.ylabel("Speed (m/s)")
+# plt.title("Speed vs. Time of Arrival")
+# plt.legend()
+# plt.show()
+
+# # Plot speed vs. dist
+# plt.figure()
+# plt.scatter(df['a_dist_first_corrected'], df['speed'])
+# plt.xlabel("Distance (m)")
+# plt.ylabel("Speed (m/s)")
+# plt.title("Speed vs. Distance")
+# plt.show()
+
+# df['norm_TOA'] = df['TOA']/df['TOA'].max() * np.pi * 2
+# df['a_dist_first_corrected'] = df['a_dist_first_corrected'] - df['a_dist_first_corrected'].min()
+
+# # Polar plot of distance vs. normalised TOA
+# plt.figure()
+# plt.polar(df['norm_TOA'], df['a_dist_first_corrected'], label='Normalised TOA')
+# plt.polar(df['mean_anomaly'], df['a_dist_first_corrected'], label='Mean Anomaly (calculated from purple line)')
+# plt.legend()
+# plt.xticks(np.arange(0, 2*np.pi, np.pi/4), ['0', r'$\frac{\pi}{4}$', r'$\frac{\pi}{2}$', r'$\frac{3\pi}{4}$', r'$\pi$', r'$\frac{5\pi}{4}$', r'$\frac{3\pi}{2}$', r'$\frac{7\pi}{4}$'])
+# plt.title("Projected Orbit")
+# plt.show()
 
 df = df[['TOA', 'a_dist_first_corrected']]
 df.rename(columns={'a_dist_first_corrected': 'dist'}, inplace=True)
-df['scaled_dist'] = df['dist'] / 10e7
-df['norm_TOA'] = df['TOA']/df['TOA'].max() * np.pi * 2
-df['sin_norm_TOA'] = np.sin(df['norm_TOA'])
+# df['scaled_dist'] = df['dist'] / 10e7
+# df['sin_norm_TOA'] = np.sin(df['norm_TOA'])
 
-# Plot sin vs. dist
-plt.figure()
-plt.scatter(df['norm_TOA'], df['scaled_dist'])
-plt.xlabel("sin(norm_TOA)")
-plt.ylabel("scaled_dist")
-plt.title("sin(norm_TOA) vs. scaled_dist")
-plt.show()
-
-print(df)
+print(df.columns)
 df.to_csv('kepler_equation.csv', index=False)
+
+# print(df)
+# df.to_csv('kepler_equation.csv', index=False)
